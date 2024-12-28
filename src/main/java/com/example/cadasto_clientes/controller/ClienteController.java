@@ -40,6 +40,13 @@ public class ClienteController {
         return "redirect:/cliente/listar";
     }
 
+    @GetMapping("/editar/{id}")
+    public String editarCliente(@PathVariable Long id, Model model) {
+        Cliente cliente = clienteService.buscarClientePorId(id);
+        model.addAttribute("cliente", cliente);
+        return "editarCliente";
+    }
+
     @GetMapping("/excluir/{id}")
     public String excluirCliente(@PathVariable Long id) {
         clienteService.excluirCliente(id);

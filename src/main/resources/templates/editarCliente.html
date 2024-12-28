@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Cliente</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h2>Editar Cliente</h2>
+
+<form th:action="@{/cliente/salvar}" method="post">
+    <input type="hidden" th:value="${cliente.id}" name="id" />
+
+    <label for="nome">Nome: </label>
+    <input type="text" id="nome" name="nome" th:value="${cliente.nome}" required="true" />
+    <br/><br/>
+
+    <label for="email">E-mail: </label>
+    <input type="email" id="email" name="email" th:value="${cliente.email}" required="true" />
+    <br/><br/>
+
+    <label for="telefone">Telefone: </label>
+    <input type="text" id="telefone" name="telefone" th:value="${cliente.telefone}" />
+    <br/><br/>
+
+    <label for="cep">CEP: </label>
+    <input type="text" id="cep" name="cep" th:value="${cliente.cep}" required="true" />
+    <button type="button" id="buscarEndereco">Buscar Endereço</button>
+    <br/><br/>
+
+    <label for="endereco">Endereço: </label>
+    <input type="text" id="endereco" name="endereco" th:value="${cliente.endereco}" readonly="true" />
+    <br/><br/>
+
+    <label for="bairro">Bairro: </label>
+    <input type="text" id="bairro" name="bairro" th:value="${cliente.bairro}" readonly="true" />
+    <br/><br/>
+
+    <label for="cidade">Cidade: </label>
+    <input type="text" id="cidade" name="cidade" th:value="${cliente.cidade}" readonly="true" />
+    <br/><br/>
+
+    <label for="estado">Estado: </label>
+    <input type="text" id="estado" name="estado" th:value="${cliente.estado}" readonly="true" />
+    <br/><br/>
+
+    <input type="submit" value="Salvar" />
+    <a th:href="@{/cliente/listar}">Voltar</a>
+</form>
+
+<script>
+    $(document).ready(function() {
+        $("#cep").on("input", function() {
+            const cep = $("#cep").val();
+            if (!cep) {
+                $("#endereco, #bairro, #cidade, #estado").val("");
+            }
+        });
+
+        $("#buscarEndereco").on("click", function() {
+            const cep = $("#cep").val();
+            if (cep) {
+                $.ajax({
+                    url: '/cliente/buscarEndereco',
+                    type: "POST",
+                    data: { cep: cep },
+                    success: function(response) {
+                        $("#endereco").val(response.logradouro);
+                        $("#bairro").val(response.bairro);
+                        $("#cidade").val(response.localidade);
+                        $("#estado").val(response.uf);
+                    },
+                    error: function() {
+                        alert("Não foi possível buscar o endereço. Verifique o CEP informado.");
+                    }
+                });
+            } else {
+                alert("Por favor, insira um CEP.");
+            }
+        });
+    });
+</script>
+</body>
+</html>
