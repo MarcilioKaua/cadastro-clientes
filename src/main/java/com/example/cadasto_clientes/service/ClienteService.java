@@ -1,9 +1,11 @@
 package com.example.cadasto_clientes.service;
 
+import com.example.cadasto_clientes.exception.EmailDuplicadoException;
 import com.example.cadasto_clientes.model.Cliente;
 import com.example.cadasto_clientes.model.Endereco;
 import com.example.cadasto_clientes.repository.ClienteRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,13 +21,19 @@ public class ClienteService {
         this.viaCepService = viaCepService;
     }
 
-    public Cliente salvarCliente(Cliente cliente) {
-        // Validações ou outras lógicas
-        return clienteRepository.save(cliente);
+    public void salvarCliente(Cliente cliente) {
+        try {
+            clienteRepository.save(cliente);
+        } catch (DataIntegrityViolationException e) {
+            throw new EmailDuplicadoException("O e-mail informado já está cadastrado.");
+        }
     }
 
     public List<Cliente> listarClientes(String nome) {
-        return nome != null ? clienteRepository.findByNomeContaining(nome) : clienteRepository.findAll();
+        if (nome != null && !nome.trim().isEmpty()) {
+            return clienteRepository.findByNomeContainingIgnoreCase(nome);
+        }
+        return clienteRepository.findAll();
     }
 
     public Cliente buscarClientePorId(Long id) {

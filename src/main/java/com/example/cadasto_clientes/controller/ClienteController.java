@@ -1,9 +1,11 @@
 package com.example.cadasto_clientes.controller;
 
+import com.example.cadasto_clientes.exception.EmailDuplicadoException;
 import com.example.cadasto_clientes.model.Cliente;
 import com.example.cadasto_clientes.model.Endereco;
 import com.example.cadasto_clientes.service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +19,10 @@ public class ClienteController {
     private ClienteService clienteService;
 
     @GetMapping("/listar")
-    public String listarClientes(Model model) {
-        List<Cliente> clientes = clienteService.listarClientes(null);
+    public String listarClientes(@RequestParam(value = "nome", required = false) String nome, Model model) {
+        List<Cliente> clientes = clienteService.listarClientes(nome);
         model.addAttribute("clientes", clientes);
-
-        if (!clientes.isEmpty()) {
-            model.addAttribute("clienteName", clientes.get(0).getNome());
-        }
-
+        model.addAttribute("paramNome", nome);
         return "listarClientes";
     }
 
@@ -57,5 +55,12 @@ public class ClienteController {
     @ResponseBody
     public Endereco buscarEndereco(@RequestParam String cep) {
         return clienteService.consultarEndereco(cep);
+    }
+
+    @ExceptionHandler(EmailDuplicadoException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleEmailDuplicadoException(EmailDuplicadoException ex) {
+        return ex.getMessage();
     }
 }
